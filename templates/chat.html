@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Secure Chat App</title>
+    <!-- <link rel="icon" href="https://e1.pngegg.com/pngimages/565/102/png-clipart-flader-82-default-icons-for-apple-app-mac-os-x-messages-round-white-and-blue-chat-icon.png"> -->
+    <link rel="icon" href="{{ url_for ('static', filename = './AppIcon.png') }}">
+    <!-- IMAGE IS STORED IN STATIC FOLDER -->
+
+    <style>
+        body {
+            font-family: Arial;
+            background-color: aliceblue;
+        }
+
+        input {
+            width: 50%;
+            border-radius: 16px;
+            font-family: Arial;
+            font-size: 1.5rem;
+            padding: 5px;
+            background-color: aliceblue;
+        }
+
+        button {
+            background-color: aliceblue;
+            border-radius: 16px;
+            font-family: Arial;
+            font-size: 1.5rem;
+        }
+
+        #messages {
+            {#background-image: url("https://thumbs.dreamstime.com/z/social-media-doodle-seamless-pattern-social-media-doodle-seamless-pattern-repeated-ornament-hand-drawn-elements-white-162559147.jpg");#}
+            {#background-image: url("https://wallpapercave.com/wp/wp5406324.jpg");#}
+            {#background-image: url('./images/doodle1.jpg');#}
+
+            /* IMAGE IS STORED IN STATIC FOLDER */
+            background-image:  url({{ url_for ('static', filename = './BgDoodle.jpg') }});
+            background-size: 100%;
+
+            height: 700px;
+            padding: 20px;
+            color: white;
+            border: 2px blue solid;
+            border-radius: 10px;
+            margin: 10px;
+        }
+
+        #messages div {
+            /* width: 30%; */
+            padding: 8px;
+            {#border: 2px lightblue solid;#}
+            border-radius: 20px;
+            margin: 4px;
+            background-color: darkslateblue;
+            color: aliceblue;
+            font-size: 1.5rem;
+            {#display: inline-block;#}
+        }
+    </style>
+</head>
+
+
+<body>
+<center><h1>Secured Chat App by Group 7!</h1></center>
+<div id="messages">
+    <center>
+        <form id="message_input_form">
+            <input type="text" id="message_input" placeholder=" Type a message ...">
+            <button type="submit">Send</button>
+        </form>
+    </center>
+    <br>
+</div>
+</body>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.1/socket.io.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/forge/1.3.1/forge.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+
+<script>
+    const socket = io.connect("http://127.0.0.1:5000");
+
+    socket.on('connect', function () {
+        socket.emit('join_room', {
+            username: "{{ username }}",
+            room: "{{ room }}"
+        });
+        let message_input = document.getElementById('message_input');
+        document.getElementById('message_input_form').onsubmit = function (e) {
+            e.preventDefault();
+            let message = message_input.value.trim();
+            if (message.length) {
+                // message = message + " OK!"
+
+                // ========================================================
+                // Text Scrambling
+
+                scrambledText = message;
+                function encrypt(s, k){                 // changing the original message by converting the characters.
+                    var n = 26;
+                    if (k < 0)
+                        return encrypt(s, k + n);
+                    return s.split('').map(function (c) {
+                            if (c.match(/[a-z]/i)) {
+                                var code = c.charCodeAt();
+                                var shift = code >= 65 && code <= 90 ? 65 : code >= 97 && code <= 122 ? 97 : 0;
+                                return String.fromCharCode(((code - shift + k) % n) + shift);
+                            }
+                            return c;
+                        }).join('');
+                }
+
+                function modify(x){                     // changing the sequence of characters
+                    let encr_str = encrypt(x, x.length % 29);
+                    array = [...encr_str];              // to get array of characters
+                    let i = 0;
+                    while (i < array.length - 1) {      //swapping adjacent elements
+                        let t = array[i];
+                        array[i] = array[i + 1];
+                        array[i + 1] = t;
+                        i = i + 2;
+                    }
+                    return array.join("");
+                }
+                scrambledText = modify(scrambledText);
+                console.log("Scrambled Text :");
+                console.log(scrambledText);
+
+
+                // Text Unscrambling
+                function decrypt(s, k){
+                    var n = 26;
+                    if (k < 0)
+                    return decrypt(s, k + n);
+                    return s.split('').map(function (c) {
+                        if (c.match(/[a-z]/i)) {
+                            var code = c.charCodeAt();
+                            var shift = code >= 65 && code <= 90 ? 65 : code >= 97 && code <= 122 ? 97 : 0;
+                            return String.fromCharCode(((code - shift + k) % n) + shift);
+                        }
+                        return c;
+                    }).join('');
+                }
+                function modify_again(x){
+                    let encr_str = decrypt(x, - x.length % 29);
+                    array = [...encr_str];
+                    let i = 0;
+                    while (i < array.length - 1) {
+                        let t = array[i];
+                        array[i] = array[i + 1];
+                        array[i + 1] = t;
+                        i = i + 2;
+                    }
+                    return array.join("");
+                }
+                scrambledText = modify_again(scrambledText)
+                console.log("Unscrambled Text :")
+                console.log(scrambledText)
+
+                // ========================================================
+                // AES ENCRYPTION
+                console.log('AES Encrypted Cipher :');
+                var textvalue = message;
+                var AESkey ='AAAAAAAAAAAAAAAA' // Key used to Encrypt the message using AES
+                AESkey = CryptoJS.enc.Utf8.parse(AESkey);
+                var encryptedAES =  CryptoJS.AES.encrypt(textvalue, AESkey, {mode:CryptoJS.mode.ECB});
+                // console.log(encryptedAES.toString(CryptoJS.enc.Utf8));
+                console.log(encryptedAES.toString());
+                var encryptedAES1 = encryptedAES.toString();
+
+
+                // ========================================================
+                // RSA ENCRYPTION FOR ENCRYPTING THE KEY
+                pubkey =  '-----BEGIN PUBLIC KEY----- MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDTSE3PXbkazI+zJtI6HudRsh5Dr1HAnebLlH34A6cuGjmJzo+HQxlZcdoyGl9QqqHDJvzJ0Z436kcRp4tzinvaMPravQkcLcefo+I+ZTNIEG28mT2y6qf9YqlsIiBfPUysenMEV+8tqQrAZZ70T2bDtflG20Cg8fnVi7H5TrHQ3wIDAQAB -----END PUBLIC KEY-----';
+                var publicKey = forge.pki.publicKeyFromPem(pubkey);
+
+                var secretMessage = 'AAAAAAAAAAAAAAAA'; // AES Key will be Encrypted using RSA
+                var encryptedRSA = publicKey.encrypt(secretMessage, "RSA-OAEP", {
+                        md: forge.md.sha256.create(),
+                        mgf1: forge.mgf1.create()
+                    });
+                var base64 = forge.util.encode64(encryptedRSA);
+                console.log('RSA Encrypted Cipher :');
+                console.log(base64);
+                // console.log(encryptedRSA);
+
+                socket.emit('send_message', {
+                    username: "{{ username }}",
+                    room: "{{ room }}",
+                    message: '',
+                    encAES: encryptedAES1,
+                    encRSA: base64
+                })
+            }
+            console.log("Sending to Server!")
+            // console.log(message)
+            message_input.value = '';
+            message_input.focus();
+        }
+    });
+
+    socket.on('receive_message', function (data) {
+        console.log("Received from Server!")
+        console.log(data);
+        const newNode = document.createElement('div');
+        {#newNode.innerHTML = `<b>${data.username}&nbsp;[${data.created_at}]:&nbsp;</b> ${data.message}`;#}
+        newNode.innerHTML = `<b>${data.username}&nbsp;</b> : ${data.message}`;
+
+        // For chat message box length
+        let len = data['message'].length;
+        let len2 = Math.round(len*1.5);
+        if(len2 > 80){
+            len2 = 75;
+        }
+        len2 = len2.toString();
+        len2 = len2+"%";
+        // console.log(typeof len2);
+
+        newNode.style.width = len2;
+        document.getElementById('messages').appendChild(newNode);
+    });
+
+    socket.on('join_room_announcement', function (data) {
+        console.log(data);
+        const newNode = document.createElement('div');
+        newNode.innerHTML = `<b>${data.username}</b> has joined the chat!`;
+        newNode.style.margin = "auto";
+        newNode.style.width = "30%";
+        newNode.style.margin = "2px auto 2px auto";
+        document.getElementById('messages').appendChild(newNode);
+    });
+</script>
+</html>

@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Secure Chat App</title>
+    <!-- <link rel="icon" href="https://e1.pngegg.com/pngimages/565/102/png-clipart-flader-82-default-icons-for-apple-app-mac-os-x-messages-round-white-and-blue-chat-icon.png"> -->
+    <link rel="icon" href="{{ url_for ('static', filename = './AppIcon.png') }}">
+    <!-- IMAGE IS STORED IN STATIC FOLDER -->
+
+    <style>
+        body {
+            {#background-image: url("https://wallpapercave.com/wp/wp5406324.jpg");#}
+            /* IMAGE IS STORED IN STATIC FOLDER */
+            background-image:  url({{ url_for ('static', filename = './BgDoodle.jpg') }});
+            background-size: 100%;
+            font-family: Arial;
+            background-color: aliceblue;
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        input {
+            {#width: 50%;#}
+            border-radius: 16px;
+            font-family: Arial;
+            font-size: 1.5rem;
+            padding: 5px;
+            background-color: aliceblue;
+        }
+
+        button {
+            background-color: aliceblue;
+            border-radius: 16px;
+            font-family: Arial;
+            font-size: 1.5rem;
+        }
+
+        /* TABLE PROPERTIES */
+        td {
+            padding: 10px 15px 10px 15px;
+            font-size: 2rem;
+            {#border: 2px solid whitesmoke;#}
+            border-radius: 10px;
+        }
+
+        tr:hover {
+            background-color: blue;
+        }
+        table {
+            color: white;
+            {#border: 3px solid darkslateblue;#}
+            border-radius: 10px;
+            border-collapse: collapse;
+            background-color: darkslateblue;
+        }
+    </style>
+</head>
+
+
+<body>
+
+<center>
+    <h1>Secured Chat App by Group 7!</h1>
+    <br>
+    <h1>LOGIN</h1>
+    <br>
+    <table>
+        <form action="/chat">
+            <tr>
+                <td>
+                    <label>Username</label>
+                </td>
+                <td>
+                    <input type="text" id="username" name="username">
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label>Room ID</label>
+                </td>
+                <td>
+                    <input type="text" id="room" name="room">
+                </td>
+            </tr>
+            <tr >
+                <td colspan="2">
+                    <center><button type="submit">LOGIN</button></center>
+
+                </td>
+            </tr>
+        </form>
+    </table>
+    <br>
+    <button id = "find-me" onclick="geoFindMe()">Validate My Location</button><br>
+    <br>
+    <p id = "status"></p>
+    <a id = "map-link" target="_blank"></a>
+</center>
+
+<script>
+    function geoFindMe() {
+        const status = document.querySelector('#status');
+        const mapLink = document.querySelector('#map-link');
+
+        mapLink.href = '';
+        mapLink.textContent = '';
+
+        function success(position) {
+            const latitude  = position.coords.latitude;
+            const longitude = position.coords.longitude;
+            status.textContent = '';
+            mapLink.href = `https://www.openstreetmap.org/#map=18/${latitude}/${longitude}`;
+            //  mapLink.textContent = `Latitude: ${latitude} °, Longitude: ${longitude} °`;
+            const lat = parseFloat(latitude);
+            const long = parseFloat(longitude);
+
+            if(lat>8 && lat<37 &&long>68&&long<98){
+                alert("People of India are Allowed!");
+            }
+            else{
+                alert("Your Country is Blocked!");
+            }
+        }
+
+        function error() {
+          status.textContent = 'Unable to retrieve your location';
+        }
+
+        if(!navigator.geolocation) {
+          status.textContent = 'Geolocation is not supported by your browser';
+        }
+        else {
+            status.textContent = 'Locating…';
+            navigator.geolocation.getCurrentPosition(success, error);
+        }
+    }
+    document.querySelector('#find-me').addEventListener('click', geoFindMe);
+</script>
+
+<script>
+    // Encryption
+    function encrypt(s, k){                 // changing the original message by converting the characters.
+        var n = 26;
+        if (k < 0)
+            return encrypt(s, k + n);
+        return s.split('').map(function (c) {
+                if (c.match(/[a-z]/i)) {
+                    var code = c.charCodeAt();
+                    var shift = code >= 65 && code <= 90 ? 65 : code >= 97 && code <= 122 ? 97 : 0;
+                    return String.fromCharCode(((code - shift + k) % n) + shift);
+                }
+                return c;
+            }).join('');
+    }
+
+    function modify(x){                     // changing the sequence of characters
+        let encr_str = encrypt(x, x.length % 29);
+        array = [...encr_str];              // to get array of characters
+        let i = 0;
+        while (i < array.length - 1) {      //swapping adjacent elements
+            let t = array[i];
+            array[i] = array[i + 1];
+            array[i + 1] = t;
+            i = i + 2;
+        }
+        return array.join("");
+    }
+
+
+    // Decryption
+
+    function encrypt(s, k){
+        var n = 26; // alphabet letters amount
+        if (k < 0)
+            return encrypt(s, k + n);
+        return s.split('').map(function (c) {
+                if (c.match(/[a-z]/i)) {
+                    var code = c.charCodeAt();
+                    var shift = code >= 65 && code <= 90 ? 65 : code >= 97 && code <= 122 ? 97 : 0;
+                    return String.fromCharCode(((code - shift + k) % n) + shift);
+                }
+                return c;
+            }).join('');
+    }
+    function modify(x){
+        let encr_str = encrypt(x, - x.length % 29);
+        array = [...encr_str];
+        let i = 0;
+        while (i < array.length - 1) {
+            let t = array[i];
+            array[i] = array[i + 1];
+            array[i + 1] = t;
+            i = i + 2;
+        }
+        return array.join("");
+    }
+</script>
+</body>
+</html>
