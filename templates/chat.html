@@ -30,10 +30,6 @@
         }
 
         #messages {
-            {#background-image: url("https://thumbs.dreamstime.com/z/social-media-doodle-seamless-pattern-social-media-doodle-seamless-pattern-repeated-ornament-hand-drawn-elements-white-162559147.jpg");#}
-            {#background-image: url("https://wallpapercave.com/wp/wp5406324.jpg");#}
-            {#background-image: url('./images/doodle1.jpg');#}
-
             /* IMAGE IS STORED IN STATIC FOLDER */
             background-image:  url({{ url_for ('static', filename = './BgDoodle.jpg') }});
             background-size: 100%;
@@ -48,14 +44,12 @@
 
         #messages div {
             /* width: 30%; */
-            padding: 8px;
-            {#border: 2px lightblue solid;#}
-            border-radius: 20px;
-            margin: 4px;
             background-color: darkslateblue;
+            border-radius: 20px;
             color: aliceblue;
             font-size: 1.5rem;
-            {#display: inline-block;#}
+            margin: 4px;
+            padding: 8px;
         }
     </style>
 </head>
