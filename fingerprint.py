@@ -5,6 +5,7 @@ import os
 test_original = cv2.imread("./Finger-Print.tif")
 cv2.imshow("Original", cv2.resize(test_original, None, fx=1, fy=1))
 # cv2.waitKey(0)
+# Destroying the Windows
 # cv2.destroyAllWindows()
 
 for file in [file for file in os.listdir("./finger-prints/")]:
