@@ -74,7 +74,7 @@ y = -1
 # =========================================
 
 # =========================================
-# TEXT TO IMAGE ENCRYPTION ALGORITHM
+# TEXT TO IMAGE ENCRYPTION ALGORITHM UPDATED
 # =========================================
 def ttieEncrypt(text, len, private_key):
     ttieImage = Image.new('RGB', (len, len))
