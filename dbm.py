@@ -3,7 +3,7 @@ from werkzeug.security import generate_password_hash
 
 from user import User
 
-client = MongoClient("mongodb+srv://test:test@chatapp.bpcztji.mongodb.net/?retryWrites=true&w=majority")
+client = MongoClient("mongodb+srv://test:test@chatapp.bpxftri.mongodb.net/?retryWrites=true&w=majority")
 
 chat_db = client.get_database("ChatDB")
 users_collection = chat_db.get_collection("users")
